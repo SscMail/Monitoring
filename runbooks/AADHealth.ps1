@@ -169,14 +169,13 @@ $tenants = @(
         TenantID    = Get-AutomationVariable -Name 'CEDTenantID';
         ClientID    = Get-AutomationVariable -Name 'CEDClientID';
         ClientSecret = Get-AutomationVariable -Name 'CEDClientSecret';
-    }  
-    #,
-    #[pscustomobject]@{
-    #    TenantName  = "AAFC";
-    #    TenantID    = Get-AutomationVariable -Name 'AAFCTenantID';
-    #    ClientID    = Get-AutomationVariable -Name 'AAFCClientID';
-    #    ClientSecret = Get-AutomationVariable -Name 'AAFCClientSecret';
-    #}
+    },
+    [pscustomobject]@{
+        TenantName  = "AAFC";
+        TenantID    = Get-AutomationVariable -Name 'AAFCTenantID';
+        ClientID    = Get-AutomationVariable -Name 'AAFCClientID';
+        ClientSecret = Get-AutomationVariable -Name 'AAFCClientSecret';
+    }
 )
 
 #--- Query M365 Service Health Dashboard via O365 Services Communications API ---#
