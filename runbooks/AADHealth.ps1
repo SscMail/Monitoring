@@ -175,6 +175,12 @@ $tenants = @(
         TenantID    = Get-AutomationVariable -Name 'AAFCTenantID';
         ClientID    = Get-AutomationVariable -Name 'AAFCClientID';
         ClientSecret = Get-AutomationVariable -Name 'AAFCClientSecret';
+    },
+    [pscustomobject]@{
+        TenantName  = "INFC";
+        TenantID    = Get-AutomationVariable -Name 'INFCTenantID';
+        ClientID    = Get-AutomationVariable -Name 'INFCClientID';
+        ClientSecret = Get-AutomationVariable -Name 'INFCClientSecret';
     }
 )
 
