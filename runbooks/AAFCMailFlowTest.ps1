@@ -71,7 +71,7 @@ $sw = New-Object Diagnostics.Stopwatch
 $sw.Start()
 
 Try {
-  Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON
+  Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON -verbose
   $SendTime = $sw.ElapsedMilliseconds
   $SendStatus = "success"
   $TransMsg = ""
