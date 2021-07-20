@@ -95,7 +95,7 @@ $omsjson = @"
 "@
 
 # Send Monitoring Data for email
-Send-OMSAPIIngestionFile -customerId $workspaceId -sharedKey $workspaceKey -body $omsjson -logType $logType
+Send-OMSAPIIngestionFile -customerId $workspaceId -sharedKey $workspaceKey -body $omsjson -logType $logType -verbose
 write-output $omsjson
 
 if ($SendStatus -eq "failure") {
