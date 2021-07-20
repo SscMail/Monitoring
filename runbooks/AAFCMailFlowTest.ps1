@@ -71,7 +71,7 @@ $sw = New-Object Diagnostics.Stopwatch
 $sw.Start()
 
 Try {
-  Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON -verbose
+  Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON
   $SendTime = $sw.ElapsedMilliseconds
   $SendStatus = "success"
   $TransMsg = ""
@@ -95,7 +95,7 @@ $omsjson = @"
 "@
 
 # Send Monitoring Data for email
-Send-OMSAPIIngestionFile -customerId $workspaceId -sharedKey $workspaceKey -body $omsjson -logType $logType -verbose
+Send-OMSAPIIngestionFile -customerId $workspaceId -sharedKey $workspaceKey -body $omsjson -logType $logType
 write-output $omsjson
 
 if ($SendStatus -eq "failure") {
