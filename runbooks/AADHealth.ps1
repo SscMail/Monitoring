@@ -187,6 +187,12 @@ $tenants = @(
         TenantID    = Get-AutomationVariable -Name 'PSCTenantID';
         ClientID    = Get-AutomationVariable -Name 'PSCClientID';
         ClientSecret = Get-AutomationVariable -Name 'PSCClientSecret';
+    },
+    [pscustomobject]@{
+        TenantName  = "JUS";
+        TenantID    = Get-AutomationVariable -Name 'JUSTenantID';
+        ClientID    = Get-AutomationVariable -Name 'JUSClientID';
+        ClientSecret = Get-AutomationVariable -Name 'JUSClientSecret';
     }
  
 )
