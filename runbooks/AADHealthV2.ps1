@@ -165,9 +165,6 @@ $tenants = @(
  
 )
 
-# Microsoft M365 Services to query logs for   #
-$M365Services = @('Exchange Online', 'Microsoft Teams', 'Identity Service','Microsoft 365 suite')
-
 #--- Query M365 Service Health Dashboard via O365 Services Communications API ---#
 $AADOrghealth = $tenants | foreach { Get-OrgSyncHealth -TenantID $_.TenantID -ClientID $_.ClientID -ClientSecret $_.ClientSecret -TenantName $_.TenantName }
 
