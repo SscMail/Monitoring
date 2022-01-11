@@ -232,16 +232,18 @@ foreach ($tenant in $tenants){
         $TransMsg = "$_"
         Write-Output $TransMsg
     }
-
-}
-
+    
     try{
         ##########################################################
         #        Process M365 Messages  one for the last tenant  #     
         ##########################################################
         $uri = "https://graph.microsoft.com/v1.0/admin/serviceAnnouncement/messages"
         $LogType = "M365Messages"
-        $Data = Invoke-RestMethod -Headers @{Authorization = "Bearer $accessToken"} -Uri $uri -Method Get    
+        $Data = Invoke-RestMethod -Headers @{Authorization = "Bearer $accessToken"} -Uri $uri -Method Get
+        
+        foreach ($msg in $Data.value){
+            $msg | Add-Member -NotePropertyName Tenant -NotePropertyValue $tenantName
+        }
         
         $JSON =  $Data.value | ConvertTo-Json -Depth 10
         Write-Output "digesting $LogType log for $tenantName"
@@ -253,4 +255,24 @@ foreach ($tenant in $tenants){
         $TransMsg = "$_"
         Write-Output $TransMsg
     }
-
+}
+<#
+    try{
+        ##########################################################
+        #        Process M365 Messages  one for the last tenant  #     
+        ##########################################################
+        $uri = "https://graph.microsoft.com/v1.0/admin/serviceAnnouncement/messages"
+        $LogType = "M365Messages"
+        $Data = Invoke-RestMethod -Headers @{Authorization = "Bearer $accessToken"} -Uri $uri -Method Get
+        
+        $JSON =  $Data.value | ConvertTo-Json -Depth 10
+        Write-Output "digesting $LogType log for $tenantName"
+        Send-OMSAPIIngestionFile -customerId $CustomerID -sharedKey $SharedKey -body $JSON -logType $LogType -Verbose
+    } Catch{
+         $SendStatus = "failure"
+       
+        Write-Output "Unable digest $LogType" 
+        $TransMsg = "$_"
+        Write-Output $TransMsg
+    }
+#>
