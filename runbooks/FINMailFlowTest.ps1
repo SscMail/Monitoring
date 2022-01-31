@@ -88,6 +88,7 @@ $omsjson = @"
 [{  "Computer": "$ENV:COMPUTERNAME",
     "TestType": "mailflow",
     "TestID": "$TestID",
+    "Tenant": "$tenant",
     "TransactionType": "sendmessage",
     "TransactionResult": "$SendStatus",
     "TransactionTime": $SendTime,
