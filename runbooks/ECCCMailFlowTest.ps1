@@ -20,6 +20,7 @@
 Import-Module MSAL.PS
 Import-Module OMSIngestionAPI
 
+$tenant ='ECCC'
 #--- Get AD Application info from variables ---#
 $clientId = Get-AutomationVariable -Name 'ECCCClientIDMailflow'
 $tenantId = Get-AutomationVariable -Name 'ECCCTenantID'
@@ -87,6 +88,7 @@ $omsjson = @"
 [{  "Computer": "$ENV:COMPUTERNAME",
     "TestType": "mailflow",
     "TestID": "$TestID",
+    "Tenant": "$tenant",
     "TransactionType": "sendmessage",
     "TransactionResult": "$SendStatus",
     "TransactionTime": $SendTime,
