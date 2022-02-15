@@ -171,6 +171,18 @@ $tenants = @(
  
 )
 
+#--- Query M365 Service Health Dashboard via O365 Services Communications API ---#
+$AADOrghealth = $tenants | foreach { Get-OrgSyncHealth -TenantID $_.TenantID -ClientID $_.ClientID -ClientSecret $_.ClientSecret -TenantName $_.TenantName }
+
+$JSON = $AADOrghealth | ConvertTo-Json -Depth 10
+#write-output $JSON
+
+#--- Set the name of the log that will be created/appended to in Log Analytics. ---#
+$LogType = "AADOrgHealth"
+
+#--- Submit the ServiceHealth Data to Log Analytics API endpoint. ---#
+Send-OMSAPIIngestionFile -customerId $CustomerID -sharedKey $SharedKey -body $JSON -logType $LogType -Verbose
+
 ####### Queries Org Synch Health and returns results ############
 function Get-OrgSyncHealth {
     [CmdletBinding()]
@@ -230,15 +242,3 @@ function Get-OrgSyncHealth {
         }
     }
 }
-
-#--- Query M365 Service Health Dashboard via O365 Services Communications API ---#
-$AADOrghealth = $tenants | foreach { Get-OrgSyncHealth -TenantID $_.TenantID -ClientID $_.ClientID -ClientSecret $_.ClientSecret -TenantName $_.TenantName }
-
-$JSON = $AADOrghealth | ConvertTo-Json -Depth 10
-#write-output $JSON
-
-#--- Set the name of the log that will be created/appended to in Log Analytics. ---#
-$LogType = "AADOrgHealth"
-
-#--- Submit the ServiceHealth Data to Log Analytics API endpoint. ---#
-Send-OMSAPIIngestionFile -customerId $CustomerID -sharedKey $SharedKey -body $JSON -logType $LogType -Verbose
