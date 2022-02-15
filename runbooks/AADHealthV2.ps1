@@ -10,8 +10,8 @@
 ##################################################################################################
 
 #--- Include module to format and send request to OMS ---#
-Import-Module OMSIngestionAPI
-Import-Module MSAL.PS
+Import-Module OMSIngestionAPI -Global
+Import-Module MSAL.PS -Global
 
 #--- Get Log Analytics authentication info from variables ---#
 $CustomerId = Get-AutomationVariable -Name 'OMSWorkSpaceID'
