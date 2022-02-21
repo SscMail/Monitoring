@@ -20,11 +20,11 @@
 Import-Module MSAL.PS
 Import-Module OMSIngestionAPI
 
-$tenant ='CSA'
+$tenant ='SSCDev'
 #--- Get AD Application info from variables ---#
 $clientId = Get-AutomationVariable -Name 'SSCDevClientIDMailflow'
-$tenantId = Get-AutomationVariable -Name 'CSATenantID'
-$redirectUri = Get-AutomationVariable -Name 'CSAURIRedirect'
+$tenantId = Get-AutomationVariable -Name 'SSCDevTenantID'
+$redirectUri = Get-AutomationVariable -Name 'SSCDevURIRedirect'
 
 #--- Get Log Analytics authentication info from variables ---#
 $workspaceId = Get-AutomationVariable -Name 'OMSWorkSpaceID'
@@ -33,8 +33,8 @@ $workspaceKey = Get-AutomationVariable -Name 'OMSPrimaryKey'
 $LogType = "O365SyntheticGraphAPI"
 $TestID = (get-date -format MMddyyyyhhmmss) + "-" + (get-random)
 
-$SenderCredential = Get-AutomationPSCredential -Name 'CSAMailFlowSender'
-$ReceiverCredential = Get-AutomationPSCredential -Name 'CSAMailFlowReceiver'
+$SenderCredential = Get-AutomationPSCredential -Name 'SSCDevCloudMailFlowSender'
+$ReceiverCredential = Get-AutomationPSCredential -Name 'SSCDevCloudMailFlowReceiver'
 $ReceiverEmail = $ReceiverCredential.UserName
 
 
