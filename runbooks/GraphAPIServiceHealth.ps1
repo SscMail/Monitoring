@@ -100,13 +100,14 @@ $tenants = @(
         ClientID    = Get-AutomationVariable -Name 'NRCanClientID';
         ClientSecret = Get-AutomationVariable -Name 'NRCanClientSecret';
     },
+	  #>
     [pscustomobject]@{
         TenantName  = "TC";
         TenantID    = Get-AutomationVariable -Name 'TCTenantID';
         ClientID    = Get-AutomationVariable -Name 'TCClientID';
         ClientSecret = Get-AutomationVariable -Name 'TCClientSecret';
     },
-    #>
+  
     [pscustomobject]@{
         TenantName  = "VAC";
         TenantID    = Get-AutomationVariable -Name 'VACTenantID';
@@ -131,7 +132,7 @@ $tenants = @(
         ClientID    = Get-AutomationVariable -Name 'IAACClientID';
         ClientSecret = Get-AutomationVariable -Name 'IAACClientSecret';
     },
-<#    
+
     [pscustomobject]@{
         TenantName  = "CED";
         TenantID    = Get-AutomationVariable -Name 'CEDTenantID';
@@ -159,7 +160,7 @@ $tenants = @(
         ClientID    = Get-AutomationVariable -Name 'PSCClientID';
         ClientSecret = Get-AutomationVariable -Name 'PSCClientSecret';
     },
-     #> 
+    
     [pscustomobject]@{
         TenantName  = "JUS";
         TenantID    = Get-AutomationVariable -Name 'JUSTenantID';
@@ -230,6 +231,7 @@ foreach ($tenant in $tenants){
     Catch {
         $SendStatus = "failure"
         $TransMsg = "$_"
+		Write-Output "FAILED processing $LogType log for $tenantName"
         Write-Output $TransMsg
     }
     
@@ -251,7 +253,7 @@ foreach ($tenant in $tenants){
     } Catch{
          $SendStatus = "failure"
        
-        Write-Output "Unable digest $LogType" 
+        Write-Output "FAILED  digesting $LogType for $tenantName" 
         $TransMsg = "$_"
         Write-Output $TransMsg
     }
