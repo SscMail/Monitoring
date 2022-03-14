@@ -93,14 +93,12 @@ $tenants = @(
         ClientID    = Get-AutomationVariable -Name 'LACClientID';
         ClientSecret = Get-AutomationVariable -Name 'LACClientSecret';
     },
-    <#
     [pscustomobject]@{
         TenantName  = "NRCan";
         TenantID    = Get-AutomationVariable -Name 'NRCanTenantID';
         ClientID    = Get-AutomationVariable -Name 'NRCanClientID';
         ClientSecret = Get-AutomationVariable -Name 'NRCanClientSecret';
     },
-	  #>
     [pscustomobject]@{
         TenantName  = "TC";
         TenantID    = Get-AutomationVariable -Name 'TCTenantID';
