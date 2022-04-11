@@ -1,1 +1,953 @@
-
+{
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workbookDisplayName": {
+      "type": "string",
+      "defaultValue": "Hybrid Exchange Monitoring ",
+      "metadata": {
+        "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
+      }
+    },
+    "workbookType": {
+      "type": "string",
+      "defaultValue": "workbook",
+      "metadata": {
+        "description": "The gallery that the workbook will been shown under. Supported values include workbook, tsg, etc. Usually, this is 'workbook'"
+      }
+    },
+    "workbookSourceId": {
+      "type": "string",
+      "defaultValue": "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourcegroups/scdc-dccp_monitoring-rg",
+      "metadata": {
+        "description": "The id of resource instance to which the workbook will be associated"
+      }
+    },
+    "workbookId": {
+      "type": "string",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "The unique guid for this workbook instance"
+      }
+    }
+  },
+  "variables": {
+    "workbookContent": {
+      "version": "Notebook/1.0",
+      "items": [
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "// Checks and reports on failed runbooks or MMA agent a\r\n\r\nlet RunbookJobFialures = (\r\n    AzureDiagnostics \r\n    | where ResourceProvider == \"MICROSOFT.AUTOMATION\"\r\n        and (RunbookName_s endswith \"mailflowtest\" or RunbookName_s in ('AADHealthV2', 'GraphAPIServiceHealth'))\r\n        and Category == \"JobLogs\"\r\n    | summarize arg_max(TimeGenerated, ResultType) by RunbookName_s\r\n    | where (ResultType == \"Failed\" or ResultType == \"Stopped\" or ResultType == \"Suspended\") \r\n    | project\r\n        Issue  = 'Runbook Job Fialure',\r\n        Message =strcat('Failed to execute runbook: ', RunbookName_s),\r\n        Resource =  RunbookName_s,\r\n        OutputValue = strcat('Execution Time:', TimeGenerated),\r\n        EventTime = TimeGenerated, \r\n        Status = 'Failure'\r\n\r\n        );\r\n\r\nlet MMAAgentHeartbeatFialures = (\r\n    Heartbeat\r\n    | summarize LastHeartbeatTime = max(TimeGenerated) by Computer \r\n    | where LastHeartbeatTime < ago(30min)\r\n    | project\r\n        Issue  = 'MMA Agent Heartbeat Fialure',\r\n        Message =strcat('No heartbeat detected in last 30min for ', Computer),\r\n        Resource = Computer,\r\n        OutputValue = strcat('Last heartbeat:', LastHeartbeatTime),\r\n        EventTime =LastHeartbeatTime,\r\n        Status = 'Failure'\r\n    );\r\n\r\nRunbookJobFialures \r\n| union MMAAgentHeartbeatFialures\r\n\r\n",
+            "size": 4,
+            "title": "M365 Service Monitoring Status",
+            "color": "orange",
+            "noDataMessage": "M365 Monitoring Services Appear Healthy",
+            "noDataMessageStyle": 3,
+            "timeContext": {
+              "durationMs": 43200000
+            },
+            "showRefreshButton": true,
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "Status",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "Failure",
+                        "representation": "4",
+                        "text": "{0}{1}"
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "success",
+                        "text": "{0}{1}"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "tileSettings": {
+              "showBorder": false
+            },
+            "mapSettings": {
+              "locInfo": "LatLong"
+            }
+          },
+          "showPin": true,
+          "name": "RunbookExecutionStatusAndMMAHeartbeatStatusQuery"
+        },
+        {
+          "type": 12,
+          "content": {
+            "version": "NotebookGroup/1.0",
+            "groupType": "editable",
+            "loadType": "always",
+            "items": [
+              {
+                "type": 1,
+                "content": {
+                  "json": "# Report Filters"
+                },
+                "name": "text - 15"
+              },
+              {
+                "type": 9,
+                "content": {
+                  "version": "KqlParameterItem/1.0",
+                  "crossComponentResources": [
+                    "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+                  ],
+                  "parameters": [
+                    {
+                      "id": "82ffa254-1c43-40b0-9e34-1b4cd6483bed",
+                      "version": "KqlParameterItem/1.0",
+                      "name": "Streams",
+                      "type": 9,
+                      "multiSelect": true,
+                      "quote": "'",
+                      "delimiter": ",",
+                      "value": [
+                        "1",
+                        "2"
+                      ],
+                      "jsonData": "[[1, 2, 3]",
+                      "timeContext": {
+                        "durationMs": 86400000
+                      }
+                    },
+                    {
+                      "id": "58c14cb5-af97-4872-8828-6fb4c3c2a0b9",
+                      "version": "KqlParameterItem/1.0",
+                      "name": "Teams",
+                      "type": 2,
+                      "multiSelect": true,
+                      "quote": "'",
+                      "delimiter": ",",
+                      "query": "TenantMapping\r\n| where supportTeam_s != 'Team 0'\r\n| distinct supportTeam_s\r\n| project value = supportTeam_s, label = supportTeam_s, selected = true\r\n",
+                      "crossComponentResources": [
+                        "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+                      ],
+                      "typeSettings": {
+                        "additionalResourceOptions": []
+                      },
+                      "queryType": 0,
+                      "resourceType": "microsoft.operationalinsights/workspaces"
+                    },
+                    {
+                      "id": "0fe5fc82-da7b-4fa4-8e72-5c994d4c8361",
+                      "version": "KqlParameterItem/1.0",
+                      "name": "Tenants",
+                      "type": 2,
+                      "multiSelect": true,
+                      "quote": "'",
+                      "delimiter": ",",
+                      "query": "TenantMapping\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams})\r\n| distinct Tenant_s\r\n| project value = Tenant_s, label = Tenant_s, selected = true \r\n",
+                      "crossComponentResources": [
+                        "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+                      ],
+                      "typeSettings": {
+                        "additionalResourceOptions": [],
+                        "showDefault": false
+                      },
+                      "queryType": 0,
+                      "resourceType": "microsoft.operationalinsights/workspaces"
+                    }
+                  ],
+                  "style": "pills",
+                  "queryType": 0,
+                  "resourceType": "microsoft.operationalinsights/workspaces"
+                },
+                "customWidth": "100",
+                "name": "parameters - 12",
+                "styleSettings": {
+                  "maxWidth": "100%"
+                }
+              }
+            ],
+            "exportParameters": true
+          },
+          "name": "group - 14",
+          "styleSettings": {
+            "showBorder": true
+          }
+        },
+        {
+          "type": 1,
+          "content": {
+            "json": "# MMA Agent Heartbeat Status \r\n"
+          },
+          "name": "text - 2"
+        },
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "let Tenants = TenantMapping();\r\nHeartbeat \r\n| summarize LastHeartbeatTime = max(TimeGenerated) by Computer \r\n| project serverName = Computer , HeartbeatLast30Min =LastHeartbeatTime > ago(30min), HeartbeatLast5Min = LastHeartbeatTime > ago(5min), LastHeartbeatTime\r\n|extend server = toupper(serverName)\r\n|join kind=fullouter (Tenants) on $left.server == $right.Server_s\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams})  and Tenant_s in ({Tenants})\r\n| project supportTeam= supportTeam_s, tenantName = Tenant_s, stream =Stream_d, serverName, HeartbeatLast30Min, HeartbeatLast5Min, LastHeartbeatTime\r\n| order by stream asc , supportTeam asc, tenantName asc \r\n\r\n\r\n\r\n",
+            "size": 0,
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "showRefreshButton": true,
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "serverName",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "is Empty",
+                        "representation": "2",
+                        "text": "[[NOT REPORTING]"
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": "{0}{1}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "HeartbeatLast30Min",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "true",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "operator": "==",
+                        "thresholdValue": "false",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "is Empty",
+                        "representation": "Unknown",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "unknown",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "HeartbeatLast5Min",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "true",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "operator": "==",
+                        "thresholdValue": "false",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "representation": "Unknown",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Unknown",
+                        "text": "{0}{1}"
+                      }
+                    ]
+                  },
+                  "numberFormat": {
+                    "unit": 0,
+                    "options": {
+                      "style": "decimal"
+                    }
+                  }
+                }
+              ],
+              "sortBy": [
+                {
+                  "itemKey": "supportTeam",
+                  "sortOrder": 1
+                }
+              ],
+              "labelSettings": [
+                {
+                  "columnId": "supportTeam",
+                  "label": "OPS Support Team"
+                },
+                {
+                  "columnId": "tenantName",
+                  "label": "Tenant"
+                },
+                {
+                  "columnId": "stream",
+                  "label": "DCCP Stream"
+                },
+                {
+                  "columnId": "serverName",
+                  "label": "Server"
+                },
+                {
+                  "columnId": "HeartbeatLast30Min",
+                  "label": "Heartbeat Last 30 Min"
+                },
+                {
+                  "columnId": "HeartbeatLast5Min",
+                  "label": "Heartbeat Last 5 Min"
+                },
+                {
+                  "columnId": "LastHeartbeatTime",
+                  "label": "Last Heartbeat Time"
+                }
+              ]
+            },
+            "sortBy": [
+              {
+                "itemKey": "supportTeam",
+                "sortOrder": 1
+              }
+            ],
+            "tileSettings": {
+              "showBorder": false
+            },
+            "graphSettings": {
+              "type": 0
+            }
+          },
+          "showPin": true,
+          "name": "query - 0"
+        },
+        {
+          "type": 1,
+          "content": {
+            "json": "# Email Synthetic Transaction Report by Partner \r\n"
+          },
+          "name": "text - 2 - Copy"
+        },
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "let Tenants = TenantMapping();\r\nO365SyntheticGraphAPI_CL\r\n| summarize TransactionDate = arg_max(TimeGenerated, TransactionTime_d, TransactionResult_s)  by Computer, TransactionType_s \r\n| order by Computer, TransactionType_s \r\n| project serverName = toupper(Computer), Computer, TransactionType_s , TransactionDate, TransactionTime_d, TransactionResult_s \r\n| join kind=fullouter (Tenants | project serverName= toupper(tostring((split(Server_s, \".\")[0]))), Tenant_s, Stream_d, supportTeam_s, Server_s) on serverName, $left.serverName == $right.serverName\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams}) and Tenant_s in ({Tenants})\r\n| project supportTeam_s, tenantName = Tenant_s, stream =Stream_d, serverName ,  TransactionType_s ,  TransactionResult_s,TransactionTime_d, TransactionDate\r\n| order by  stream asc, supportTeam_s asc, tenantName asc",
+            "size": 0,
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "showRefreshButton": true,
+            "showExportToExcel": true,
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "serverName",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "is Empty",
+                        "representation": "warning",
+                        "text": "[[NOT REPORTING]"
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": "{0}{1}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "TransactionResult_s",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "failure",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "==",
+                        "thresholdValue": "success",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "representation": "unknown",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "unknown",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "TransactionTime_d",
+                  "formatter": 4,
+                  "formatOptions": {
+                    "palette": "greenRed"
+                  }
+                }
+              ],
+              "sortBy": [
+                {
+                  "itemKey": "stream",
+                  "sortOrder": 1
+                }
+              ],
+              "labelSettings": [
+                {
+                  "columnId": "supportTeam_s",
+                  "label": "OPS Support Team"
+                },
+                {
+                  "columnId": "tenantName",
+                  "label": "Tenant"
+                },
+                {
+                  "columnId": "stream",
+                  "label": "DCCP Stream"
+                },
+                {
+                  "columnId": "serverName",
+                  "label": "Server"
+                },
+                {
+                  "columnId": "TransactionType_s",
+                  "label": "Test Type"
+                },
+                {
+                  "columnId": "TransactionResult_s",
+                  "label": "Test Result"
+                },
+                {
+                  "columnId": "TransactionTime_d",
+                  "label": "Transaction Time in ms",
+                  "comment": "Time it took to perform the transaction in mili seconds "
+                },
+                {
+                  "columnId": "TransactionDate",
+                  "label": "Test Date and Time"
+                }
+              ]
+            },
+            "sortBy": [
+              {
+                "itemKey": "stream",
+                "sortOrder": 1
+              }
+            ]
+          },
+          "showPin": true,
+          "name": "query - 1"
+        },
+        {
+          "type": 1,
+          "content": {
+            "json": "# Active Directory Sync Status \r\n"
+          },
+          "name": "text - 2 - Copy - Copy"
+        },
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "AADOrgHealth_CL\r\n|summarize arg_max(TimeGenerated, *) by O365TenantName_s\r\n| extend LastHour=iff(OrgOnPremLastSyncDateTime_t between (ago(1h) .. now()),'True','False'), Last2Hours=iff(OrgOnPremLastSyncDateTime_t between (ago(2h) .. ago(1h)),'True','False'), Last4Hours=iff(OrgOnPremLastSyncDateTime_t between (ago(4h) .. ago(2h)),'True','False')\r\n| extend MoreThan4Hours=iff(OrgOnPremLastSyncDateTime_t < (ago(4hr)),'True','False')\r\n| join  (TenantMapping() ) on $left.O365TenantName_s == $right.Tenant_s\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams}) and O365TenantName_s in ({Tenants})\r\n| project SupportTeam = supportTeam_s, Stream = Stream_d, O365TenantName_s, TimeGenerated, OrgOnPremLastSyncDateTime_t,LastHour,Last2Hours,Last4Hours,MoreThan4Hours\r\n| order by O365TenantName_s asc , TimeGenerated desc ",
+            "size": 0,
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "visualization": "table",
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "OrgOnPremLastSyncDateTime_t",
+                  "formatter": 6,
+                  "formatOptions": {
+                    "aggregation": "Min"
+                  },
+                  "dateFormat": {
+                    "showUtcTime": null,
+                    "formatName": "shortDateTimePattern"
+                  }
+                },
+                {
+                  "columnMatch": "LastHour",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last2Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "2",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "MoreThan4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                }
+              ],
+              "labelSettings": [
+                {
+                  "columnId": "SupportTeam",
+                  "label": "OPS Support Team"
+                },
+                {
+                  "columnId": "O365TenantName_s",
+                  "label": "Tenant"
+                },
+                {
+                  "columnId": "TimeGenerated",
+                  "label": "Report Time"
+                },
+                {
+                  "columnId": "OrgOnPremLastSyncDateTime_t",
+                  "label": "Last Sync Date and Time "
+                },
+                {
+                  "columnId": "LastHour",
+                  "label": "Last Sync < 1 Hour"
+                },
+                {
+                  "columnId": "Last2Hours",
+                  "label": "Last Sync > 1, <2  Hours"
+                },
+                {
+                  "columnId": "Last4Hours",
+                  "label": "Last Sync >2, <4 Hours"
+                },
+                {
+                  "columnId": "MoreThan4Hours",
+                  "label": "Last Sync > 4  Hours"
+                }
+              ]
+            }
+          },
+          "name": "query - 4"
+        },
+        {
+          "type": 1,
+          "content": {
+            "json": "# Hybrid Exchange Managed Availability Reported Errors "
+          },
+          "name": "text - 8"
+        },
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "// Managed Availability\r\n// <Applications and Services Logs\\Microsoft\\Exchange\\ManagedAvailability\\Monitoring\r\nEvent\r\n| extend EventDate = bin( TimeGenerated, 1d ),  server = toupper(Computer)\r\n| where Source == \"Microsoft-Exchange-ManagedAvailability\" \r\n| join kind=leftouter (\r\n        TenantMapping()\r\n         | project SupportTeam = supportTeam_s, server = Server_s, Tenant = Tenant_s, supportTeam = supportTeam_s, Stream = Stream_d\r\n    )  on $left.server == $right.server \r\n| where SupportTeam in ({Teams}) and Stream in ({Streams}) and  Tenant in ({Tenants})\r\n| summarize EventCount= count() by Tenant, EventDate, server\r\n| order  by  Tenant, EventDate desc ",
+            "size": 0,
+            "timeContext": {
+              "durationMs": 2592000000
+            },
+            "showRefreshButton": true,
+            "showExportToExcel": true,
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "visualization": "areachart",
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "OrgOnPremLastSyncDateTime_t",
+                  "formatter": 6,
+                  "formatOptions": {
+                    "aggregation": "Min"
+                  },
+                  "dateFormat": {
+                    "showUtcTime": null,
+                    "formatName": "shortDateTimePattern"
+                  }
+                },
+                {
+                  "columnMatch": "LastHour",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last2Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "2",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "MoreThan4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "chartSettings": {
+              "xAxis": "EventDate",
+              "showLegend": true,
+              "showDataPoints": true
+            }
+          },
+          "name": "ExchangeManagedAvailabilityErrors"
+        },
+        {
+          "type": 3,
+          "content": {
+            "version": "KqlItem/1.0",
+            "query": "\r\ngetManagedAvailabilityLogs\r\n| where SupportTeam in ({Teams}) and Tenant in ({Tenants})\r\n",
+            "size": 0,
+            "timeContext": {
+              "durationMs": 2592000000
+            },
+            "showRefreshButton": true,
+            "showExportToExcel": true,
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "crossComponentResources": [
+              "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/scdc-dccp_monitoring-rg/providers/Microsoft.OperationalInsights/workspaces/ScDcCLD-DCCP-Monitoring-law"
+            ],
+            "visualization": "table",
+            "showExpandCollapseGrid": true,
+            "gridSettings": {
+              "formatters": [
+                {
+                  "columnMatch": "RenderedDescription",
+                  "formatter": 1,
+                  "formatOptions": {
+                    "customColumnWidthSetting": "70%"
+                  }
+                },
+                {
+                  "columnMatch": "OrgOnPremLastSyncDateTime_t",
+                  "formatter": 6,
+                  "formatOptions": {
+                    "aggregation": "Min"
+                  },
+                  "dateFormat": {
+                    "showUtcTime": null,
+                    "formatName": "shortDateTimePattern"
+                  }
+                },
+                {
+                  "columnMatch": "LastHour",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "success",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last2Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "2",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "Last4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columnMatch": "MoreThan4Hours",
+                  "formatter": 18,
+                  "formatOptions": {
+                    "thresholdsOptions": "icons",
+                    "thresholdsGrid": [
+                      {
+                        "operator": "==",
+                        "thresholdValue": "True",
+                        "representation": "failed",
+                        "text": ""
+                      },
+                      {
+                        "operator": "Default",
+                        "thresholdValue": null,
+                        "representation": "Blank",
+                        "text": ""
+                      }
+                    ]
+                  }
+                }
+              ],
+              "sortBy": [
+                {
+                  "itemKey": "EventDate",
+                  "sortOrder": 1
+                }
+              ]
+            },
+            "sortBy": [
+              {
+                "itemKey": "EventDate",
+                "sortOrder": 1
+              }
+            ],
+            "chartSettings": {
+              "xAxis": "EventDate",
+              "showLegend": true,
+              "showDataPoints": true
+            }
+          },
+          "name": "ExchangeManagedAvailabilityErrors - Copy"
+        }
+      ],
+      "isLocked": false,
+      "fallbackResourceIds": [
+        "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourcegroups/scdc-dccp_monitoring-rg"
+      ]
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('workbookId')]",
+      "type": "microsoft.insights/workbooks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2021-03-08",
+      "dependsOn": [],
+      "kind": "shared",
+      "properties": {
+        "displayName": "[parameters('workbookDisplayName')]",
+        "serializedData": "[string(variables('workbookContent'))]",
+        "version": "1.0",
+        "sourceId": "[parameters('workbookSourceId')]",
+        "category": "[parameters('workbookType')]"
+      }
+    }
+  ],
+  "outputs": {
+    "workbookId": {
+      "type": "string",
+      "value": "[resourceId( 'microsoft.insights/workbooks', parameters('workbookId'))]"
+    }
+  },
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"
+}
