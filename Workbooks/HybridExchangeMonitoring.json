@@ -98,7 +98,7 @@
               {
                 "type": 1,
                 "content": {
-                  "json": "# Report Filters"
+                  "json": "## Report Parameters"
                 },
                 "name": "text - 15"
               },
@@ -184,18 +184,12 @@
           }
         },
         {
-          "type": 1,
-          "content": {
-            "json": "# MMA Agent Heartbeat Status \r\n"
-          },
-          "name": "text - 2"
-        },
-        {
           "type": 3,
           "content": {
             "version": "KqlItem/1.0",
             "query": "let Tenants = TenantMapping();\r\nHeartbeat \r\n| summarize LastHeartbeatTime = max(TimeGenerated) by Computer \r\n| project serverName = Computer , HeartbeatLast30Min =LastHeartbeatTime > ago(30min), HeartbeatLast5Min = LastHeartbeatTime > ago(5min), LastHeartbeatTime\r\n|extend server = toupper(serverName)\r\n|join kind=fullouter (Tenants) on $left.server == $right.Server_s\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams})  and Tenant_s in ({Tenants})\r\n| project supportTeam= supportTeam_s, tenantName = Tenant_s, stream =Stream_d, serverName, HeartbeatLast30Min, HeartbeatLast5Min, LastHeartbeatTime\r\n| order by stream asc , supportTeam asc, tenantName asc \r\n\r\n\r\n\r\n",
             "size": 0,
+            "title": "MMA Agent Heartbeat Status",
             "timeContext": {
               "durationMs": 86400000
             },
@@ -351,18 +345,12 @@
           "name": "query - 0"
         },
         {
-          "type": 1,
-          "content": {
-            "json": "# Email Synthetic Transaction Report by Partner \r\n"
-          },
-          "name": "text - 2 - Copy"
-        },
-        {
           "type": 3,
           "content": {
             "version": "KqlItem/1.0",
             "query": "let Tenants = TenantMapping();\r\nO365SyntheticGraphAPI_CL\r\n| summarize TransactionDate = arg_max(TimeGenerated, TransactionTime_d, TransactionResult_s)  by Computer, TransactionType_s \r\n| order by Computer, TransactionType_s \r\n| project serverName = toupper(Computer), Computer, TransactionType_s , TransactionDate, TransactionTime_d, TransactionResult_s \r\n| join kind=fullouter (Tenants | project serverName= toupper(tostring((split(Server_s, \".\")[0]))), Tenant_s, Stream_d, supportTeam_s, Server_s) on serverName, $left.serverName == $right.serverName\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams}) and Tenant_s in ({Tenants})\r\n| project supportTeam_s, tenantName = Tenant_s, stream =Stream_d, serverName ,  TransactionType_s ,  TransactionResult_s,TransactionTime_d, TransactionDate\r\n| order by  stream asc, supportTeam_s asc, tenantName asc",
             "size": 0,
+            "title": "Email Synthetic Transaction Report by Partner",
             "timeContext": {
               "durationMs": 86400000
             },
@@ -487,18 +475,12 @@
           "name": "query - 1"
         },
         {
-          "type": 1,
-          "content": {
-            "json": "# Active Directory Sync Status \r\n"
-          },
-          "name": "text - 2 - Copy - Copy"
-        },
-        {
           "type": 3,
           "content": {
             "version": "KqlItem/1.0",
             "query": "AADOrgHealth_CL\r\n|summarize arg_max(TimeGenerated, *) by O365TenantName_s\r\n| extend LastHour=iff(OrgOnPremLastSyncDateTime_t between (ago(1h) .. now()),'True','False'), Last2Hours=iff(OrgOnPremLastSyncDateTime_t between (ago(2h) .. ago(1h)),'True','False'), Last4Hours=iff(OrgOnPremLastSyncDateTime_t between (ago(4h) .. ago(2h)),'True','False')\r\n| extend MoreThan4Hours=iff(OrgOnPremLastSyncDateTime_t < (ago(4hr)),'True','False')\r\n| join  (TenantMapping() ) on $left.O365TenantName_s == $right.Tenant_s\r\n| where supportTeam_s in ({Teams}) and Stream_d in ({Streams}) and O365TenantName_s in ({Tenants})\r\n| project SupportTeam = supportTeam_s, Stream = Stream_d, O365TenantName_s, TimeGenerated, OrgOnPremLastSyncDateTime_t,LastHour,Last2Hours,Last4Hours,MoreThan4Hours\r\n| order by O365TenantName_s asc , TimeGenerated desc ",
             "size": 0,
+            "title": "Active Directory Sync Status",
             "timeContext": {
               "durationMs": 86400000
             },
@@ -781,6 +763,8 @@
             "version": "KqlItem/1.0",
             "query": "\r\ngetManagedAvailabilityLogs\r\n| where SupportTeam in ({Teams}) and Tenant in ({Tenants})\r\n",
             "size": 0,
+            "title": "Hybrid Exchange Managed Availability Reported Errors",
+            "noDataMessage": "No errors reported based on selected filter criteria",
             "timeContext": {
               "durationMs": 2592000000
             },
@@ -898,6 +882,7 @@
                   }
                 }
               ],
+              "filter": true,
               "sortBy": [
                 {
                   "itemKey": "EventDate",
