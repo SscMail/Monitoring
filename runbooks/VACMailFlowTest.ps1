@@ -95,7 +95,7 @@ $omsjson = @"
     "TransactionResult": "$SendStatus",
     "TransactionTime": $SendTime,
     "TransactionMessage": "$TransMsg",
-    "JobID": "$jobid"
+    "JobId": "$jobid"
 }]
 "@
 
@@ -150,7 +150,7 @@ $omsjson = @"
     "TransactionResult": "$ReceiveStatus",
     "TransactionTime": $ReceiveTime,
     "TransactionMessage": "$TransMsg",
-    "JobID": "$jobid"
+    "JobId": "$jobid"
 }]
 "@
 
