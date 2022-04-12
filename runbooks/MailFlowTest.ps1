@@ -27,6 +27,7 @@ param(
 Import-Module MSAL.PS
 Import-Module OMSIngestionAPI
 
+$jobid = $PSPrivateMetadata.JobId.Guid
 $tenant  =$partnername
 #--- Get AD Application info from variables ---#
 $clientId = Get-AutomationVariable -Name ($tenant+'ClientIDMailflow')
@@ -99,7 +100,8 @@ $omsjson = @"
     "TransactionType": "sendmessage",
     "TransactionResult": "$SendStatus",
     "TransactionTime": $SendTime,
-    "TransactionMessage": "$TransMsg"
+    "TransactionMessage": "$TransMsg",
+    "JobID": "$jobid"
 }]
 "@
 
@@ -153,7 +155,8 @@ $omsjson = @"
     "TransactionType": "searchformessage",
     "TransactionResult": "$ReceiveStatus",
     "TransactionTime": $ReceiveTime,
-    "TransactionMessage": "$TransMsg"
+    "TransactionMessage": "$TransMsg",
+    "JobID": "$jobid"
 }]
 "@
 
