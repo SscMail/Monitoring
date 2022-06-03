@@ -47,11 +47,18 @@ $ReceiverEmail = $ReceiverCredential.UserName
 
 
 # Send email to receiver
-$token = Get-MsalToken -ClientId $clientId -TenantId $tenantId -RedirectUri $redirectUri -UserCredential $SenderCredential
-$accessToken = $token.AccessToken
-
-$header = @{"Authorization" = "Bearer $accessToken"; "Content-Type" = "application/json" };
+$senderAuthenticated = ""
 $sendMailMessageUrl = "https://graph.microsoft.com/v1.0/me/sendMail"
+try{
+	$token = Get-MsalToken -ClientId $clientId -TenantId $tenantId -RedirectUri $redirectUri -UserCredential $SenderCredential
+	$accessToken = $token.AccessToken
+	$header = @{"Authorization" = "Bearer $accessToken"; "Content-Type" = "application/json" };
+	$senderAuthenticated = 'true'
+}
+Catch{
+	$SendStatus = "failure"
+    $TransMsg = "Send Mail Authentication Failed: $_"
+}
 
 # Create Message body
 $JSON = @"
@@ -78,18 +85,19 @@ $JSON = @"
 $sw = New-Object Diagnostics.Stopwatch
 
 $sw.Start()
-
-Try {
-  Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON
-  $SendTime = $sw.ElapsedMilliseconds
-  $SendStatus = "success"
-  $TransMsg = ""
-} 
-Catch {
-  $sw.Stop()
-  $SendTime = $sw.ElapsedMilliseconds
-  $SendStatus = "failure"
-  $TransMsg = "$_"
+if ($senderAuthenticated){
+	Try {
+		Invoke-RestMethod -Method POST -Headers $header -Uri $sendMailMessageUrl -Body $JSON
+		$SendTime = $sw.ElapsedMilliseconds
+		$SendStatus = "success"
+		$TransMsg = ""
+	} 
+	Catch {
+		$sw.Stop()
+		$SendTime = $sw.ElapsedMilliseconds
+		$SendStatus = "failure"
+		$TransMsg = "Send Mail Failed: $_"
+	}
 }
 
 $omsjson = @"
@@ -114,38 +122,53 @@ if ($SendStatus -eq "failure") {
 }
 
 # reply to email 
-$replyToken = Get-MsalToken -ClientId $clientId -TenantId $tenantId -RedirectUri $redirectUri -UserCredential $ReceiverCredential
-$replyAccessToken = $replyToken.AccessToken
+$receiverAuthenticated =''
+try{
+	$replyToken = Get-MsalToken -ClientId $clientId -TenantId $tenantId -RedirectUri $redirectUri -UserCredential $ReceiverCredential
+	$replyAccessToken = $replyToken.AccessToken
 
-# Obtain latest message from Graph API
-$getMessageHeader = @{"Authorization" = "Bearer $replyAccessToken"; "Content-Type" = "application/json" };
-$getMessageMessageUrl = "https://graph.microsoft.com/v1.0/me/messages?`$search=`"Subject:Test Email $TestID`""
-
+	# Obtain latest message from Graph API
+	$getMessageHeader = @{"Authorization" = "Bearer $replyAccessToken"; "Content-Type" = "application/json" };
+	$getMessageMessageUrl = "https://graph.microsoft.com/v1.0/me/messages?`$search=`"Subject:Test Email $TestID`""
+	$receiverAuthenticated = 'true'
+}
+Catch{
+	
+	$ReceiveStatus = "failure"
+    $TransMsg = "Receive Mail Authentication Failed: $_"
+}
 $sw = New-Object Diagnostics.Stopwatch
 
 $retry = 0
+if($receiverAuthenticated){
+	do {
+		Start-Sleep $retry
 
-do {
-  Start-Sleep $retry
+		$sw.Start()
+		try{
+			$getMessageReply = Invoke-RestMethod -Method GET -Headers $getMessageHeader -Uri $getMessageMessageUrl
+			$sw.Stop()
+		}
+		Catch{
+			$TransMsg = "Receive Email Failed: $_"	
+			$ReceiveStatus = "failure"
+			$sw.Stop()
+			break
+		}
+		$ReceiveTime = $sw.ElapsedMilliseconds
+		$messageCount = $getMessageReply.value.Count
 
-  $sw.Start()
-  $getMessageReply = Invoke-RestMethod -Method GET -Headers $getMessageHeader -Uri $getMessageMessageUrl
-  $sw.Stop()
-
-  $ReceiveTime = $sw.ElapsedMilliseconds
-
-  $messageCount = $getMessageReply.value.Count
-
-  if ($messageCount -gt 0) {
-    $ReceiveStatus = "success"
-    $TransMsg = ""
-  }
-  else {
-    $ReceiveStatus = "failure"
-    $TransMsg = "Message with Subject 'Test Email $TestID' not found"
-  }
-  $retry++
-} until (($messageCount -gt 0) -or ($retry -gt 10))
+		if ($messageCount -gt 0) {
+			$ReceiveStatus = "success"
+			$TransMsg = ""
+		}
+		else {
+			$ReceiveStatus = "failure"
+			$TransMsg = "Message with Subject 'Test Email $TestID' not found"
+		}
+		$retry++
+	} until (($messageCount -gt 0) -or ($retry -gt 10))
+}
 
 $omsjson = @"
 [{   "Computer": "$ENV:COMPUTERNAME",
