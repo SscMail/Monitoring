@@ -1,0 +1,666 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "AADNC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "AADNC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "SSCDev_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "AAFC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "AAFC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "AADNC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "ACOA_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "ACOA"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "AAFC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "CED_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "CED"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "ACOA_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "DFO_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "DFO"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "CED_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "ECCC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "ECCC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "DFO_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "ESDC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "ESDC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "WD_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "FIN_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "FIN"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "ECCC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "IAAC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "IAAC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "FIN_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "IRB_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "IRB"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "IAAC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "JUS_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "JUS"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "IRB_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "PCH_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "PCH"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "PC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "PCO_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "PCO"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "PCH_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "PC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "PC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "JUS_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "PPSC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "PPSC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "PCO_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "PSC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "PSC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "PPSC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "SSCDev_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "TenantName": "SSCDev"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            },
+            "SSC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "SSC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "PSC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "STATCAN_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "STATCAN"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "SSC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "TC_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "TC"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "STATCAN_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "WD_M365ReportGenerator": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "parameters": {
+                                "StorageEnvironment": "MSI",
+                                "TenantName": "WD"
+                            }
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azureautomation_1']['connectionId']"
+                        }
+                    },
+                    "method": "put",
+                    "path": "/subscriptions/@{encodeURIComponent('58c54c05-93d3-4fe9-8a49-62a44400bc8c')}/resourceGroups/@{encodeURIComponent('ScDc-DCCP_Monitoring-rg')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('ScDc-DCCP-Monitoring-aa')}/jobs",
+                    "queries": {
+                        "runbookName": "M365ReportGenerator",
+                        "wait": false,
+                        "x-ms-api-version": "2015-10-31"
+                    }
+                },
+                "runAfter": {
+                    "TC_M365ReportGenerator": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "evaluatedRecurrence": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "timeZone": "Eastern Standard Time"
+                },
+                "recurrence": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "timeZone": "Eastern Standard Time"
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azureautomation_1": {
+                    "connectionId": "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/resourceGroups/ScDc-DCCP_Monitoring-rg/providers/Microsoft.Web/connections/azureautomation-1",
+                    "connectionName": "azureautomation-1",
+                    "id": "/subscriptions/58c54c05-93d3-4fe9-8a49-62a44400bc8c/providers/Microsoft.Web/locations/canadacentral/managedApis/azureautomation"
+                }
+            }
+        }
+    }
+}
