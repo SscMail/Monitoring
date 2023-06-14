@@ -9,10 +9,71 @@ param(
 )
 
 
+function OMSLog {
+    [CmdletBinding()]
+    param (
+        [string]
+        $Status,
+        [string]
+        $StatusDescription,  
+        [string] 
+        $Tenant
+    )
+    $obj = [pscustomobject][ordered]@{
+        Status            = $Status
+        JobDetails       = "Liscencing Report"
+        StatusDescription = $StatusDescription
+        FireDateTime      = Get-Date
+        JobType          = "Licencing"
+        Category      = "Reports"
+        JobId             = $jobid
+        Tenant            = $Tenant
+    }
+    $JSON = $obj | ConvertTo-Json -Depth 10
+    Send-OMSAPIIngestionFile -customerId $OMSWorkspaceId -sharedKey $OMSSharedKey -body $JSON -logType "ReportsLog" -Verbose
+}
+
+
 function Log($val) {
     $date = Get-Date
-   # $Ram =(Get-Counter '\Memory\Available MBytes')[0].CounterSamples.CookedValue
-    Write-Output "$date : `t $Ram MB: `t$val"
+    if($MemLog){
+        $Ram =(Get-Counter '\Memory\Available MBytes')[0].CounterSamples.CookedValue
+    }
+    if($Debug){
+        Write-Output "$date : `t $Ram MB: `t$val"
+    }
+}
+
+function Upload-Blob-Files {
+    param (
+        [string] $FilePath,
+        [System.Collections.ArrayList] $FileNames,
+        [string] $Directory,
+        [string] $Url,
+        [string] $ContainerName
+
+    )
+    try{
+        $ctx = New-AzStorageContext -ConnectionString $Url
+        foreach($fileName in $FileNames){
+            Log "Uploading file $FileName..."
+            # upload a file to the default account (inferred) access tier
+            $Blob1HT = @{
+                File      = ($FilePath + $FileName)
+                Container = $ContainerName
+                Blob      = ($Directory + $FileName)
+                Context   = $ctx
+            }
+            $result = Set-AzStorageBlobContent @Blob1HT 
+            Remove-Item ($FilePath + $FileName)
+
+        }
+    } Catch{
+        $error ="Unable to upload files $FileNames . Errors: $_"
+        Log $error
+        Throw $error
+    }
+
 }
 
 function Upload-Blob-File {
@@ -43,18 +104,37 @@ Import-Module MSAL.PS
 Import-Module Microsoft.Graph.Authentication
 Import-Module Microsoft.Graph.Users
 
+######## Runbook configuration ##############
+$MemLog = $false
+$Debug = $false
+$ErrorActionPreference = "Stop"
+
 # Number of entries to be returned by each graph users call. 
 # maximum number is 999 
 $pageSize = 999
+######## END Runbook configuration ##############
 
+#--- Get Log Analytics authentication info from variables ---#
+$OMSWorkspaceId = Get-AutomationVariable -Name 'OMSWorkSpaceID'
+$OMSSharedKey = Get-AutomationVariable -Name 'OMSPrimaryKey'
+$jobid = $PSPrivateMetadata.JobId.Guid
 
 $tenantID = Get-AutomationVariable -Name ($tenantName + 'TenantID');
 $clientID = Get-AutomationVariable -Name ($tenantName + 'ClientID');
 $secureClientSecret = (Get-AutomationVariable -Name ($tenantName + 'ClientSecret')) | ConvertTo-SecureString -AsPlainText -Force;
 
+try{
     
-$token = Get-MsalToken -clientID $clientID -clientSecret $secureClientSecret -tenantID $tenantID
-$accessToken = $token.AccessToken
+    $token = Get-MsalToken -clientID $clientID -clientSecret $secureClientSecret -tenantID $tenantID
+    $accessToken = $token.AccessToken
+} Catch{
+    $status ="fail"
+    $TransMsg = "FAILED due to authentication while processing Licenses Report for $tenantName reason: $_"
+    OMSLog -Status $status -StatusDescription $TransMsg -Tenant $tenantName
+    Log $TransMsg
+    $continue = $false
+    Throw $TransMsg
+}
 $header = @{"Authorization" = "Bearer $accessToken"; "Content-Type" = "application/json" };
 
 $path = ($env:TEMP + "\")
@@ -68,7 +148,7 @@ $FileDirectoryVariableName = 'StorageAccountReportsDirectory'
 $Url = Get-AutomationVariable -Name $storageAccountURLVariableName 
 $ContainerName = Get-AutomationVariable -Name $storageAccountContainerVariableName 
 $Directory = Get-AutomationVariable -Name $FileDirectoryVariableName
-
+$fileNamesToUpload = [System.Collections.ArrayList]@()
 Log "############## Processing License Summary for Tenant $tenantName ###############"
 
 $AggregateFileName = "Licences$fileNameSufix"
@@ -76,6 +156,7 @@ $ServicePlansFileName = "Licence_ServicePlans$fileNameSufix"
 $PrepaidUnitsFilename = "Licence_PrepaidUnits$fileNameSufix"
 
 try {
+    
     Log "Connecting to graph..."
     $graphConnectResults = Connect-MgGraph -AccessToken $accessToken 
     Select-MgProfile beta
@@ -120,15 +201,18 @@ try {
 
     Log "Exporting $AggregateFileName..."
     $AggregateData | select tenantID, CapabilityStatus, Id, SkuId, SkuPartNumber, ConsumedUnits | Export-Csv -Path ($path + $AggregateFileName) -NoTypeInformation  
-    Upload-Blob-File -FileName $AggregateFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
+    [void] $fileNamesToUpload.Add($AggregateFileName)
+    #Upload-Blob-File -FileName $AggregateFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
       
     Log "Exporting $ServicePlansFileName..."
     $ServicePlans | Export-Csv -Path ($path + $ServicePlansFileName) -NoTypeInformation  
-    Upload-Blob-File -FileName $ServicePlansFileName  -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
-        
+    [void] $fileNamesToUpload.Add($ServicePlansFileName)
+    #Upload-Blob-File -FileName $ServicePlansFileName  -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
+   
     Log "Exporting $PrepaidUnitsFilename..."
     $PrepaidUnits | Export-Csv -Path ($path + $PrepaidUnitsFilename) -NoTypeInformation  
-    Upload-Blob-File -FileName $PrepaidUnitsFilename  -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
+    [void] $fileNamesToUpload.Add($PrepaidUnitsFilename)
+    #Upload-Blob-File -FileName $PrepaidUnitsFilename  -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName
         
     Log "Clearing Licences variables..."
     Clear-Variable -Name "ServicePlans" -Scope Global
@@ -137,14 +221,25 @@ try {
 
     Log "Calling Garbage Collection"
     [GC]::Collect()
+    $continue =$true
 }
 Catch {
+    $status ="fail"
     $TransMsg = "FAILED processing Licenses Report for $tenantName reason: $_"
+    OMSLog -Status $status -StatusDescription $TransMsg -Tenant $tenantName
     Log $TransMsg
+    $continue = $false
     Throw $TransMsg
 }
 Finally {
     $disconnectResults = Disconnect-MgGraph
+     
+}
+# content of this block should never get to execute 
+if($continue -eq $false){
+    Throw $TransMsg
+    exit; 
+
 }
 
 Log "############## Processing User Licenses for Tenant $tenantName ###############"
@@ -285,19 +380,33 @@ Try {
         [GC]::Collect()
     }
     while ($UserNextLink -ne  $null )
+    [void] $fileNamesToUpload.Add($UserFileName)
+    [void] $fileNamesToUpload.Add($UserLicenseAssignmentStatesFileName)
+    [void] $fileNamesToUpload.Add($UserLicenseAssignmentStatesDisabledPlansFileName)
+    [void] $fileNamesToUpload.Add($UserProvisionedPlansFileName)
+    [void] $fileNamesToUpload.Add($UserAssignedLicensesFileName)
+    [void] $fileNamesToUpload.Add($UserAssignedPlansFileName)
 
-    Upload-Blob-File -FileName $UserFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
-    Upload-Blob-File -FileName $UserLicenseAssignmentStatesFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
-    Upload-Blob-File -FileName $UserLicenseAssignmentStatesDisabledPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
-    Upload-Blob-File -FileName $UserProvisionedPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
-    Upload-Blob-File -FileName $UserAssignedLicensesFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
-    Upload-Blob-File -FileName $UserAssignedPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    Upload-Blob-Files -FileNames $fileNamesToUpload -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
     
+    #Upload-Blob-File -FileName $UserFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    #Upload-Blob-File -FileName $UserLicenseAssignmentStatesFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    #Upload-Blob-File -FileName $UserLicenseAssignmentStatesDisabledPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    #Upload-Blob-File -FileName $UserProvisionedPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    #Upload-Blob-File -FileName $UserAssignedLicensesFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+    #Upload-Blob-File -FileName $UserAssignedPlansFileName -FilePath  $path -Directory $Directory -Url $Url -ContainerName $ContainerName 
+
+    OMSLog -Status "pass" -StatusDescription "Processed Users Report for  for $tenantName " -Tenant $tenantName
     Log "############# Job Completed ##############"
+    
 }
 Catch {
     $TransMsg = "FAILED processing Users Report for  for $tenantName with errors: $_"
     Log $TransMsg
+     OMSLog -Status "fail" -StatusDescription $TransMsg -Tenant $tenantName
+     -ErrorAction "Stop"  
     Throw $TransMsg
 }
+
+
 
